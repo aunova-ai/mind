@@ -2,7 +2,7 @@
  * Mind Weather - Core Engine
  * Zero-Cost Client-side Logic v1.2
  */
-console.log("Aunova Mind Engine v1.0.5 Live");
+console.log("Aunova Mind Engine v2.0.0 Live (Root Migration Complete)");
 
 let currentQuestion = 0;
 let totalScore = 0;
@@ -31,11 +31,12 @@ const careTitleLabel = document.getElementById('care-title');
 // 1. Fetch Data
 async function init() {
     try {
-        const qRes = await fetch('./content/questions/burnout_v1.json');
+        // Fetching V2 data to bypass cache
+        const qRes = await fetch('./content/questions/mind_test_v2.json?v=2026');
         const qData = await qRes.json();
         questions = qData.questions;
 
-        const rRes = await fetch('./content/results/weather_mapping.json');
+        const rRes = await fetch('./content/results/weather_result_v2.json?v=2026');
         const rData = await rRes.json();
         resultMapping = rData.results;
     } catch (err) {
