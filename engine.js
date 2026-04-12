@@ -2,6 +2,7 @@
  * Mind Weather - Core Engine
  * Zero-Cost Client-side Logic v1.2
  */
+console.log("Aunova Mind Engine v1.0.5 Live");
 
 let currentQuestion = 0;
 let totalScore = 0;

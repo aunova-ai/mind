@@ -3,7 +3,7 @@
   "results": [
     {
       "type": "맑음 (Clear)",
-      "score_range": [0, 25],
+      "score_range": [0, 12],
       "image_path": "./assets/clear.png",
       "title": "쾌청한 아침 햇살이 내리쬐는 마음",
       "diagnosis": "현재 당신의 마음은 구름 한 점 없는 맑은 상태입니다. 에너지가 넘치고 새로운 도전을 시작하기에 최적의 기기압을 가지고 있네요!",
@@ -14,7 +14,7 @@
     },
     {
       "type": "흐림 (Cloudy)",
-      "score_range": [26, 50],
+      "score_range": [13, 25],
       "image_path": "./assets/cloudy.png",
       "title": "부드러운 구름이 해를 가린 마음",
       "diagnosis": "조금씩 피로가 쌓여 시야가 흐려지고 있습니다. 자칫하면 소나기가 내릴 수 있는 불안정한 대기 상태입니다.",
@@ -25,7 +25,7 @@
     },
     {
       "type": "안개 (Foggy)",
-      "score_range": [51, 75],
+      "score_range": [26, 38],
       "image_path": "./assets/foggy.png",
       "title": "길을 잃은 자욱한 안개 속 마음",
       "diagnosis": "번아웃이 이미 시작되었을 가능성이 커요. 내가 어디로 가고 있는지 흐릿해진 상태입니다.",
@@ -36,7 +36,7 @@
     },
     {
       "type": "폭풍 (Stormy)",
-      "score_range": [76, 100],
+      "score_range": [39, 50],
       "image_path": "./assets/stormy.png",
       "title": "번개와 폭풍우가 몰아치는 마음",
       "diagnosis": "현재 심각한 정서적 탈진 상태입니다. 작은 자극에도 무너질 듯 위태로운 폭풍 경보가 발령되었습니다.",
