@@ -111,6 +111,16 @@ function showResult() {
     // Care Video Section Update
     careTitleLabel.innerText = result.care_title;
     currentCareUrl = result.care_video_url;
+    
+    // Ensure the video card text is updated if needed
+    careVideoText.innerText = `클릭하여 ${result.type.split(' ')[0]} 처방 영상 보기`;
 }
+
+// 7. Event Listeners for Result Actions
+document.getElementById('care-video-section').addEventListener('click', () => {
+    if (currentCareUrl) {
+        window.open(currentCareUrl, '_blank');
+    }
+});
 
 init();
