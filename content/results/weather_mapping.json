@@ -4,7 +4,7 @@
     {
       "type": "맑음 (Clear)",
       "score_range": [0, 25],
-      "image_path": "assets/clear.png",
+      "image_path": "./assets/clear.png",
       "title": "쾌청한 아침 햇살이 내리쬐는 마음",
       "diagnosis": "현재 당신의 마음은 구름 한 점 없는 맑은 상태입니다. 에너지가 넘치고 새로운 도전을 시작하기에 최적의 기기압을 가지고 있네요!",
       "advice": "이 맑은 날씨를 오래 유지하려면, 가끔은 그늘 밑에서 쉬어가는 법도 잊지 마세요.",
@@ -15,7 +15,7 @@
     {
       "type": "흐림 (Cloudy)",
       "score_range": [26, 50],
-      "image_path": "assets/cloudy.png",
+      "image_path": "./assets/cloudy.png",
       "title": "부드러운 구름이 해를 가린 마음",
       "diagnosis": "조금씩 피로가 쌓여 시야가 흐려지고 있습니다. 자칫하면 소나기가 내릴 수 있는 불안정한 대기 상태입니다.",
       "advice": "좋아하는 음악을 듣거나 SNS를 잠시 끄고 나만의 시간을 가지세요.",
@@ -26,7 +26,7 @@
     {
       "type": "안개 (Foggy)",
       "score_range": [51, 75],
-      "image_path": "assets/foggy.png",
+      "image_path": "./assets/foggy.png",
       "title": "길을 잃은 자욱한 안개 속 마음",
       "diagnosis": "번아웃이 이미 시작되었을 가능성이 커요. 내가 어디로 가고 있는지 흐릿해진 상태입니다.",
       "advice": "지금 가장 필요한 건 '멈춤'입니다. 안개가 걷힐 때까지 무리해서 걷지 마세요.",
@@ -37,7 +37,7 @@
     {
       "type": "폭풍 (Stormy)",
       "score_range": [76, 100],
-      "image_path": "assets/stormy.png",
+      "image_path": "./assets/stormy.png",
       "title": "번개와 폭풍우가 몰아치는 마음",
       "diagnosis": "현재 심각한 정서적 탈진 상태입니다. 작은 자극에도 무너질 듯 위태로운 폭풍 경보가 발령되었습니다.",
       "advice": "전문가와의 상담이나 즉각적인 휴식이 강력히 권고됩니다. 혼자 이 폭풍을 맞지 마세요.",
