@@ -24,10 +24,10 @@
         body {
             font-family: 'Outfit', 'Noto Sans KR', sans-serif;
             background: var(--bg-gradient);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Start from top */
+            align-items: center; /* Center again for one-screen view */
             overflow-x: hidden;
             overflow-y: auto;
             color: var(--text-main);
@@ -243,32 +243,45 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         }
 
-        /* Responsive PC Additions */
-        @media (min-width: 768px) {
-            #app-container { max-width: 1100px; padding-bottom: 140px; padding-top: 40px; }
-            #bottom-nav { max-width: 700px; bottom: 40px; }
+        /* Responsive PC Additions - Optimized for One-Screen View */
+        @media (min-width: 1024px) {
+            #app-container { max-width: 1000px; height: 90vh; padding-bottom: 20px; padding-top: 0; }
+            #bottom-nav { 
+                position: relative; /* Inside container at bottom */
+                max-width: 500px; 
+                margin: 20px auto 0 auto;
+                bottom: 0; left: 0; transform: none;
+            }
             .content-box, .question-box, .result-box { 
-                padding: 60px 80px; 
+                padding: 30px 50px; 
+                flex: 1;
                 display: flex;
                 flex-direction: column;
+                justify-content: center;
                 align-items: center;
             }
             .intro-image-wrapper {
-                width: calc(100% + 160px); /* Adjusting for wider 80px padding */
-                margin: -60px -80px 40px -80px;
-                height: 550px;
+                width: calc(100% + 100px);
+                margin: -30px -50px 20px -50px;
+                height: 350px; /* Reduced to fit screen */
             }
-            .brand-title { font-size: 20px; }
-            .test-title { font-size: 56px; margin-bottom: 25px; }
-            .test-desc { font-size: 22px; max-width: 800px; }
-            .primary-btn { font-size: 24px; padding: 22px 80px; margin-top: 20px; }
-            .top-logo-img { height: 60px; }
-            .top-logo-text { font-size: 30px; }
-            #question-text { font-size: 36px; max-width: 800px; }
-            .option-btn { font-size: 22px; padding: 25px 40px; max-width: 700px; }
-            #result-type { font-size: 72px; }
-            #result-diagnosis { font-size: 22px; max-width: 800px; }
-            .result-image-wrapper { height: 500px; max-width: 900px; }
+            .brand-title { font-size: 16px; }
+            .test-title { font-size: 42px; margin-bottom: 15px; }
+            .test-desc { font-size: 18px; margin-bottom: 30px; }
+            .primary-btn { font-size: 20px; padding: 15px 60px; }
+            
+            .top-logo-img { height: 40px; }
+            .top-logo-text { font-size: 20px; }
+            
+            #question-text { font-size: 28px; }
+            .option-btn { font-size: 18px; padding: 18px 30px; }
+            
+            #result-type { font-size: 56px; }
+            #result-diagnosis { font-size: 18px; line-height: 1.5; margin-bottom: 15px; }
+            .result-image-wrapper { height: 320px; margin-bottom: 15px; }
+            
+            #care-video-section { flex: 0; width: 100%; margin: 10px 0; }
+            .action-btns { margin-top: 10px; width: 100%; }
         }
     </style>
 </head>
