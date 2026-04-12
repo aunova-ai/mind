@@ -24,10 +24,10 @@
         body {
             font-family: 'Outfit', 'Noto Sans KR', sans-serif;
             background: var(--bg-gradient);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Start from top */
             overflow-x: hidden;
             overflow-y: auto;
             color: var(--text-main);
@@ -42,7 +42,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            padding: 20px 20px 100px 20px; /* Padding bottom for nav space */
+            padding: 20px 20px 120px 20px; /* Increased bottom padding for nav */
             box-sizing: border-box;
         }
         .header-logo {
@@ -221,8 +221,6 @@
         }
         /* Scrollable result */
         .result-box {
-            overflow-y: auto;
-            max-height: calc(90vh - 120px);
             padding-bottom: 20px;
         }
         /* Video Modal */
@@ -247,25 +245,30 @@
 
         /* Responsive PC Additions */
         @media (min-width: 768px) {
-            #app-container { max-width: 900px; padding-bottom: 120px; }
-            #bottom-nav { max-width: 600px; bottom: 30px; }
-            .content-box, .question-box, .result-box { padding: 60px 50px; }
-            .intro-image-wrapper {
-                width: calc(100% + 100px); /* Adjusting for padding */
-                margin: -60px -50px 40px -50px;
-                height: 450px;
+            #app-container { max-width: 1100px; padding-bottom: 140px; padding-top: 40px; }
+            #bottom-nav { max-width: 700px; bottom: 40px; }
+            .content-box, .question-box, .result-box { 
+                padding: 60px 80px; 
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
-            .brand-title { font-size: 18px; }
-            .test-title { font-size: 48px; }
-            .test-desc { font-size: 20px; }
-            .primary-btn { font-size: 22px; padding: 20px 60px; }
-            .top-logo-img { height: 50px; }
-            .top-logo-text { font-size: 26px; }
-            #question-text { font-size: 32px; }
-            .option-btn { font-size: 20px; padding: 22px 30px; }
-            #result-type { font-size: 60px; }
-            #result-diagnosis { font-size: 19px; }
-            .result-image-wrapper { height: 350px; }
+            .intro-image-wrapper {
+                width: calc(100% + 160px); /* Adjusting for wider 80px padding */
+                margin: -60px -80px 40px -80px;
+                height: 550px;
+            }
+            .brand-title { font-size: 20px; }
+            .test-title { font-size: 56px; margin-bottom: 25px; }
+            .test-desc { font-size: 22px; max-width: 800px; }
+            .primary-btn { font-size: 24px; padding: 22px 80px; margin-top: 20px; }
+            .top-logo-img { height: 60px; }
+            .top-logo-text { font-size: 30px; }
+            #question-text { font-size: 36px; max-width: 800px; }
+            .option-btn { font-size: 22px; padding: 25px 40px; max-width: 700px; }
+            #result-type { font-size: 72px; }
+            #result-diagnosis { font-size: 22px; max-width: 800px; }
+            .result-image-wrapper { height: 500px; max-width: 900px; }
         }
     </style>
 </head>
