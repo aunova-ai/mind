@@ -142,10 +142,14 @@
         }
         .result-image-wrapper {
             width: 100%; height: 220px;
-            background: white; border-radius: 20px;
+            background: #f9f9f9; border-radius: 20px;
             margin-bottom: 20px; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
         }
-        #result-img { width: 100%; height: 100%; object-fit: cover; }
+        #result-img { 
+            max-width: 95%; max-height: 95%; 
+            object-fit: contain; 
+        }
         #care-video-section { margin: 15px 0; text-align: left; }
         #care-title {
             font-size: 14px; font-weight: 700;
@@ -388,102 +392,58 @@
     console.log("Aunova Mind Engine v3.0.0 All-in-One");
 
     // ===== EMBEDDED DATA =====
-    const questions = [
-        {
-            id: 1,
-            text: "오늘 아침 눈을 떴을 때, 당신의 마음 하늘은 어떤 풍경이었나요?",
-            options: [
-                {text: "밝은 햇살이 비치는 맑은 하늘 ☀️", score: 0},
-                {text: "햇살은 있지만 어딘가 개운하지 않은 살짝 흐린 하늘", score: 3},
-                {text: "뿌연 구름이 끼어 해가 보이지 않는 하늘 ☁️", score: 5},
-                {text: "비가 올 것 같은 어둡고 무거운 하늘", score: 8},
-                {text: "눈앞이 보이지 않는 자욱한 안개 속 🌫️", score: 10}
-            ]
-        },
-        {
-            id: 2,
-            text: "업무나 일상적인 일들을 시작할 때, 마음의 대기 압력은 어떤가요?",
-            options: [
-                {text: "기분 좋게 발걸음이 가벼운 고기압 💪", score: 0},
-                {text: "할 만하지만 예전만큼의 열정은 아닌 상태", score: 3},
-                {text: "시작은 하지만 금방 지치는 불안정한 기압", score: 6},
-                {text: "조금만 건드려도 소나기가 올 것 같은 저기압 🌧️", score: 8},
-                {text: "숨쉬기조차 벅찬 무거운 압박감 ⛈️", score: 10}
-            ]
-        },
-        {
-            id: 3,
-            text: "집중력이 흐트러질 때, 어떤 행동 패턴이 나타나나요?",
-            options: [
-                {text: "잠깐 쉬고 다시 활기차게 집중한다 ✨", score: 0},
-                {text: "쉬는 시간이 점점 길어지지만 결국 돌아온다", score: 3},
-                {text: "죄책감을 느끼면서도 멍하니 스마트폰을 본다 📱", score: 6},
-                {text: "그만해야지 하면서도 무기력하게 계속 본다", score: 8},
-                {text: "이미 모든 의욕을 상실해 폰조차 보기 힘들다 😶", score: 10}
-            ]
-        },
-        {
-            id: 4,
-            text: "최근 주변의 좋은 소식이나 슬픈 소식을 들었을 때, 어떻게 느끼시나요?",
-            options: [
-                {text: "함께 기뻐하거나 슬퍼하며 온전히 공감한다 🤗", score: 0},
-                {text: "공감은 하지만 예전처럼 깊이 느껴지진 않는다", score: 3},
-                {text: "반응은 하지만 마음속은 무덤덤한 느낌이다", score: 6},
-                {text: "나와는 상관없는 일인 듯 감정이 메마른 느낌이다 🏜️", score: 8},
-                {text: "더 이상 인간관계 자체에 에너지를 쓰고 싶지 않다", score: 10}
-            ]
-        },
-        {
-            id: 5,
-            text: "당신에게 '휴식'이란 현재 어떤 의미인가요?",
-            options: [
-                {text: "새로운 에너지를 채우는 설레는 시간 🌈", score: 0},
-                {text: "쉬면 나아지긴 하지만 완전히 회복되진 않는다", score: 3},
-                {text: "잠시 멈춰서 간신히 숨을 고르는 시간 😮‍💨", score: 6},
-                {text: "쉬어도 죄책감이 들어 제대로 쉬지 못한다", score: 8},
-                {text: "아무리 쉬어도 풀리지 않는 늪 같은 시간 🕳️", score: 10}
-            ]
-        }
+    // ===== EMBEDDED DATA =====
+    const questionPool = [
+        { id: 1, text: "오늘 아침 눈을 떴을 때, 마음 하늘은 어떤 풍경이었나요?", options: [{text: "맑음 ☀️", score: 0}, {text: "흐림", score: 3}, {text: "구름 ☁️", score: 6}, {text: "비", score: 8}, {text: "안개 🌫️", score: 10}] },
+        { id: 2, text: "업무를 시작할 때, 현재 마음의 대기 압력은?", options: [{text: "가벼운 고기압 💪", score: 0}, {text: "무거운 저기압 🌧️", score: 8}, {text: "불안정한 기압", score: 5}] },
+        { id: 3, text: "집중력이 깨질 때, 당신의 행동은?", options: [{text: "금방 회복 ✨", score: 0}, {text: "멍하니 폰 보기 📱", score: 7}, {text: "의욕 상실 😶", score: 10}] },
+        { id: 4, text: "주변의 기쁜 소식에 내 마음은?", options: [{text: "진심으로 축하 🤗", score: 0}, {text: "덤덤함", score: 5}, {text: "반응하기 힘듦 🏜️", score: 10}] },
+        { id: 5, text: "요즘 나에게 '휴식'이란?", options: [{text: "에너지 충전 🌈", score: 0}, {text: "간신히 숨 고르기", score: 6}, {text: "늪 같은 시간 🕳️", score: 10}] },
+        { id: 6, text: "예정에 없던 약속이 잡히면?", options: [{text: "오히려 좋아! 🎉", score: 0}, {text: "귀찮지만 나감", score: 5}, {text: "짜증이 남 💢", score: 10}] },
+        { id: 7, text: "영화 주인공에게 감정이입이 되나요?", options: [{text: "완전 공감 😭", score: 0}, {text: "적당히 이해", score: 4}, {text: "전혀 안 됨", score: 10}] },
+        { id: 8, text: "식사 메뉴 고르는 게 힘든가요?", options: [{text: "금방 고름 🍔", score: 0}, {text: "남이 정해주길 바람", score: 6}, {text: "선택이 고통임", score: 10}] },
+        { id: 9, text: "잠들기 전 주로 드는 생각은?", options: [{text: "내일이 기대됨 🌟", score: 0}, {text: "오늘 실수 자책", score: 6}, {text: "눈 안 떴으면 함", score: 10}] },
+        { id: 10, text: "거울 속 내 모습은 어떤가요?", options: [{text: "미소 지음 🙂", score: 0}, {text: "생기 없음", score: 6}, {text: "보기 싫음 🌑", score: 10}] }
     ];
 
     const resultMapping = [
         {
-            type: "맑음 (Clear)",
+            type: "맑음 (Quokka)",
             score_range: [0, 12],
             image_path: "./assets/clear.png",
-            title: "쾌청한 아침 햇살이 내리쬐는 마음",
-            diagnosis: "현재 당신의 마음은 구름 한 점 없는 맑은 상태입니다. 에너지가 넘치고 새로운 도전을 시작하기에 최적의 기기압을 가지고 있네요!",
-            care_title: "에너지를 더 채워주는 추천 명상",
+            title: "쾌활한 쿼카처럼 빛나는 마음",
+            diagnosis: "현재 당신의 마음은 세상에서 가장 행복한 동물, 쿼카처럼 맑음 상태입니다! 에너지가 넘치고 새로운 도전을 시작하기에 최적의 시기네요.",
+            care_title: "행복을 더 확장하는 명상",
             care_video_url: "https://www.youtube.com/watch?v=5V2E_7y8iOk",
             color: "#FFB347"
         },
         {
-            type: "흐림 (Cloudy)",
+            type: "흐림 (Koala)",
             score_range: [13, 25],
             image_path: "./assets/cloudy.png",
-            title: "부드러운 구름이 해를 가린 마음",
-            diagnosis: "조금씩 피로가 쌓여 시야가 흐려지고 있습니다. 자칫하면 소나기가 내릴 수 있는 불안정한 대기 상태입니다.",
-            care_title: "무거워진 마음을 비우는 쇼츠",
+            title: "잠잠한 코알라처럼 쉬어가는 마음",
+            diagnosis: "지금은 조금 느긋한 코알라가 되어야 할 때입니다. 구름이 해를 살짝 가린 것처럼 에너지가 조금 떨어졌으니 무리하지 마세요.",
+            care_title: "무거워진 마음을 정화하는 쇼츠",
             care_video_url: "https://www.youtube.com/shorts/50uXgR9pGz4",
             color: "#FFE0B2"
         },
         {
-            type: "안개 (Foggy)",
+            type: "안개 (Rabbit)",
             score_range: [26, 38],
             image_path: "./assets/foggy.png",
-            title: "길을 잃은 자욱한 안개 속 마음",
-            diagnosis: "번아웃이 이미 시작되었을 가능성이 커요. 내가 어디로 가고 있는지 흐릿해진 상태입니다.",
-            care_title: "안개를 헤쳐나가는 보이스 명상",
+            title: "길을 찾는 토끼처럼 조심스러운 마음",
+            diagnosis: "안갯속에서 길을 찾는 토끼처럼, 지금 어디로 가야 할지 조금 혼란스러운 상태일 수 있어요. 번아웃 주의보가 발령되었습니다.",
+            care_title: "시야를 다시 밝혀주는 명상",
             care_video_url: "https://www.youtube.com/watch?v=3R4M7wT8P24",
             color: "#E0F2F1"
         },
         {
-            type: "폭풍 (Stormy)",
-            score_range: [39, 50],
+            type: "폭풍 (Lion)",
+            score_range: [39, 100],
             image_path: "./assets/stormy.png",
-            title: "번개와 폭풍우가 몰아치는 마음",
-            diagnosis: "현재 심각한 정서적 탈진 상태입니다. 작은 자극에도 무너질 듯 위태로운 폭풍 경보가 발령되었습니다.",
-            care_title: "폭풍우를 멈추는 긴급 마음 처방",
+            title: "지친 사자처럼 휴식이 필요한 마음",
+            diagnosis: "용맹한 사자도 아프면 쉬어야 합니다. 지금 당신의 마음은 폭풍우가 몰아치는 매우 위태로운 상태입니다. 당장 휴식이 필요해요.",
+            care_title: "내 안의 폭풍을 멈추는 긴급 처방",
             care_video_url: "https://www.youtube.com/watch?v=MIr3rsfCk_Y",
             color: "#FF8A65"
         }
@@ -493,6 +453,7 @@
     let currentQuestion = 0;
     let totalScore = 0;
     let currentCareUrl = "";
+    let activeQuestions = [];
 
     const startScreen = document.getElementById('start-screen');
     const questionScreen = document.getElementById('question-screen');
@@ -509,8 +470,17 @@
     const careVideoText = document.getElementById('care-video-text');
     const careTitleLabel = document.getElementById('care-title');
 
+    // Shuffle and pick 5
+    function initQuestions() {
+        const shuffled = [...questionPool].sort(() => 0.5 - Math.random());
+        activeQuestions = shuffled.slice(0, 5);
+        currentQuestion = 0;
+        totalScore = 0;
+    }
+
     // Start Test
     startBtn.addEventListener('click', () => {
+        initQuestions();
         startScreen.classList.remove('active');
         questionScreen.classList.add('active');
         displayQuestion();
@@ -518,14 +488,14 @@
 
     // Display Question
     function displayQuestion() {
-        if (currentQuestion >= questions.length) {
+        if (currentQuestion >= activeQuestions.length) {
             showLoading();
             return;
         }
-        const q = questions[currentQuestion];
+        const q = activeQuestions[currentQuestion];
         questionNumber.innerText = `Question ${String(currentQuestion + 1).padStart(2, '0')}`;
         questionText.innerText = q.text;
-        progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+        progressBar.style.width = `${((currentQuestion + 1) / activeQuestions.length) * 100}%`;
         optionsContainer.innerHTML = '';
         q.options.forEach(opt => {
             const btn = document.createElement('button');
@@ -558,9 +528,9 @@
         resultScreen.classList.add('active');
         const result = resultMapping.find(r =>
             totalScore >= r.score_range[0] && totalScore <= r.score_range[1]
-        ) || resultMapping[0];
+        ) || resultMapping[resultMapping.length - 1];
 
-        resultType.innerText = result.type;
+        resultType.innerText = result.type.split(' ')[0]; 
         resultType.style.color = result.color;
         resultDiagnosis.innerText = result.diagnosis;
         resultImg.src = result.image_path;
