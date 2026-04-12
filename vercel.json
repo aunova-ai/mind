@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "name": "aunova-mind",
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/src/$1" }
-  ]
-}

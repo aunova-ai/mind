@@ -112,14 +112,17 @@ function showResult() {
     careTitleLabel.innerText = result.care_title;
     currentCareUrl = result.care_video_url;
     
-    // Ensure the video card text is updated if needed
     careVideoText.innerText = `클릭하여 ${result.type.split(' ')[0]} 처방 영상 보기`;
 }
 
 // 7. Event Listeners for Result Actions
-document.getElementById('care-video-section').addEventListener('click', () => {
+document.getElementById('care-video-btn').addEventListener('click', (e) => {
+    e.preventDefault();
     if (currentCareUrl) {
+        console.log("Redirecting to:", currentCareUrl);
         window.open(currentCareUrl, '_blank');
+    } else {
+        alert("처방 영상을 준비 중입니다.");
     }
 });
 
