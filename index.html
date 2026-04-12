@@ -361,19 +361,19 @@
 
         <!-- Bottom Navigation -->
         <nav id="bottom-nav">
-            <div class="nav-item">
+            <div class="nav-item active" onclick="setNavActive(this)">
                 <img src="https://img.icons8.com/material-rounded/48/home.png" class="nav-icon" alt="home">
                 <span>Home</span>
             </div>
-            <div class="nav-item active">
+            <div class="nav-item" onclick="setNavActive(this)">
                 <img src="https://img.icons8.com/material-rounded/48/gift.png" class="nav-icon" alt="present">
                 <span>Present</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" onclick="setNavActive(this)">
                 <img src="https://img.icons8.com/material-rounded/48/video-playlist.png" class="nav-icon" alt="video">
                 <span>Video</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" onclick="setNavActive(this)">
                 <img src="https://img.icons8.com/material-rounded/48/customer-support.png" class="nav-icon" alt="care">
                 <span>Care</span>
             </div>
@@ -616,10 +616,22 @@
         }
     });
 
-    // Community Button
-    document.getElementById('community-btn').addEventListener('click', () => {
-        window.open('https://open.kakao.com/', '_blank');
-    });
+    // Navigation Active State Handler
+    window.setNavActive = function(element) {
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        element.classList.add('active');
+        
+        const label = element.querySelector('span').innerText;
+        if (label === 'Home') {
+            location.reload(); // Simple way to go back to landing for now
+        } else if (label === 'Present') {
+            alert("선물(굿즈) 페이지는 준비 중입니다.");
+        } else if (label === 'Video') {
+            alert("영상 페이지는 준비 중입니다.");
+        } else if (label === 'Care') {
+            alert("상담사 연결 페이지는 준비 중입니다.");
+        }
+    };
     </script>
 </body>
 </html>
