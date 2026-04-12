@@ -35,14 +35,26 @@
             width: 100%;
             max-width: 450px;
             height: 90vh;
+            display: flex;
+            flex-direction: column;
             position: relative;
             padding: 20px;
         }
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            z-index: 10;
+        }
+        .top-logo-img { height: 36px; width: auto; object-fit: contain; }
+        .top-logo-text { font-size: 18px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+        
         section {
             display: none;
             flex-direction: column;
             align-items: center;
-            height: 100%;
+            flex: 1;
             animation: fadeIn 0.5s ease;
         }
         section.active { display: flex; }
@@ -228,14 +240,20 @@
 </head>
 <body>
     <div id="app-container">
+        <!-- Header Logo -->
+        <header class="header-logo">
+            <img src="assets/logo.png" alt="Mind Weather Logo" class="top-logo-img">
+            <span class="top-logo-text">Mind Weather</span>
+        </header>
+
         <!-- Start Screen -->
         <section id="start-screen" class="active">
             <div class="content-box">
                 <div class="intro-image-wrapper">
                     <img src="assets/intro.png" alt="내 마음의 기상청" class="intro-img">
                 </div>
-                <h1 class="brand-title">Aunova Mind</h1>
-                <h2 class="test-title">번아웃 기상 특보</h2>
+                <h1 class="brand-title">Aunova Mind Weather</h1>
+                <h2 class="test-title">오늘 마음 날씨는 어떤가요?</h2>
                 <p class="test-desc">오늘 당신의 마음 하늘에는 어떤 구름이 떠 있나요?<br>10초면 확인하는 나만의 정밀 심리 기상도</p>
                 <button id="start-btn" class="primary-btn">진단 시작하기</button>
             </div>
