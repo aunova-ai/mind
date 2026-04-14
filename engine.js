@@ -1,231 +1,302 @@
 /**
- * Mind Weather - Core Engine V3.0.0
- * Dual-Axis (Weather/Humidity) Scoring & Dynamic Content Logic
+ * Mind Weather — Core Engine V3.1.0
+ * Dual-Axis Scoring + Navigation + Share Logic
  */
-console.log("Aunova Mind Engine v3.0.0 Live (2-Axis Hybrid Scoring Active)");
+console.log("Mind Weather Engine v3.1.0 (Rebuilt UI Compatible)");
 
+// ──────────────────────────────────────────────
+// 상태 변수
+// ──────────────────────────────────────────────
 let currentQuestion = 0;
-let weatherScore = 0;
-let humidityScore = 0;
-let questions = []; // Will hold 10 MCs + 1 SUB
-let resultMapping = [];
-let currentCareUrl = "";
+let weatherScore    = 0;
+let humidityScore   = 0;
+let questions       = [];
+let resultMapping   = [];
+let currentCareUrl  = "";
 
-// DOM Elements
-const startScreen = document.getElementById('start-screen');
-const questionScreen = document.getElementById('question-screen');
-const loadingScreen = document.getElementById('loading-screen');
-const resultScreen = document.getElementById('result-screen');
-const mcArea = document.getElementById('mc-area');
-const subjectiveArea = document.getElementById('subjective-area');
+// ──────────────────────────────────────────────
+// DOM 레퍼런스
+// ──────────────────────────────────────────────
+const landingScreen    = document.getElementById('landing-screen');
+const startScreen      = document.getElementById('start-screen');
+const questionScreen   = document.getElementById('question-screen');
+const loadingScreen    = document.getElementById('loading-screen');
+const resultScreen     = document.getElementById('result-screen');
 
-const startBtn = document.getElementById('start-btn');
-const submitBtn = document.getElementById('submit-btn');
-const questionText = document.getElementById('question-text');
+const appHeader        = document.getElementById('app-header');
+const bottomNav        = document.getElementById('bottom-nav');
+
+const mcArea           = document.getElementById('mc-area');
+const subjectiveArea   = document.getElementById('subjective-area');
+const startBtn         = document.getElementById('start-btn');
+const submitBtn        = document.getElementById('submit-btn');
+const questionText     = document.getElementById('question-text');
 const optionsContainer = document.getElementById('options-container');
-const progressBar = document.getElementById('progress-bar-fill');
-const questionNumber = document.getElementById('question-number');
+const progressBar      = document.getElementById('progress-bar-fill');
+const questionNumber   = document.getElementById('question-number');
 
-const resultType = document.getElementById('result-type');
-const resultDiagnosis = document.getElementById('result-diagnosis');
-const resultImg = document.getElementById('result-img');
-const careVideoText = document.getElementById('care-video-text');
-const careTitleLabel = document.getElementById('care-title');
+const resultType       = document.getElementById('result-type');
+const resultDiagnosis  = document.getElementById('result-diagnosis');
+const resultImg        = document.getElementById('result-img');
+const careVideoText    = document.getElementById('care-video-text');
+const careTitleLabel   = document.getElementById('care-title');
 
-// 1. Fetch Data & Prepare 11 Questions
+// ──────────────────────────────────────────────
+// 화면 전환 유틸리티
+// ──────────────────────────────────────────────
+const QUIZ_SCREENS   = ['question-screen', 'loading-screen'];
+const NAV_TAB_SCREENS = ['start-screen', 'present-screen', 'video-screen', 'care-screen'];
+
+/**
+ * 지정 화면을 활성화하고 나머지 숨김
+ * @param {string} screenId - 표시할 섹션 ID
+ * @param {object} opts      - { showHeader, showNav }
+ */
+function showScreen(screenId, opts = {}) {
+    const { showHeader = true, showNav = true } = opts;
+
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+
+    appHeader.style.display = showHeader ? 'flex' : 'none';
+    bottomNav.style.display = showNav    ? 'flex' : 'none';
+}
+
+// ──────────────────────────────────────────────
+// 전역 네비게이션 함수 (HTML onclick에서 호출)
+// ──────────────────────────────────────────────
+window.navigateTo = function(screenId, el) {
+    showScreen(screenId);
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+    // 결과 화면에서 홈으로 이동 시 Home 탭 활성화
+    if (screenId === 'start-screen') {
+        const homeNav = document.querySelector('.nav-item[onclick*="start-screen"]');
+        if (homeNav) homeNav.classList.add('active');
+    }
+};
+
+window.openVideo = function(embedUrl) {
+    const modal = document.getElementById('video-modal');
+    const iframe = document.getElementById('video-iframe');
+    iframe.src = embedUrl;
+    modal.classList.add('active');
+};
+
+// ──────────────────────────────────────────────
+// 1. 초기화: 데이터 로드
+// ──────────────────────────────────────────────
 async function init() {
     try {
-        // [완전 자동화] 사용자 접속 기기의 현재 날짜/월을 기반으로 작동
-        const today = new Date();
-        const currentYear = today.getFullYear();
+        const today        = new Date();
+        const currentYear  = today.getFullYear();
         const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
-        const targetFile = `./content/questions/${currentYear}_${currentMonth}.json?v=` + Date.now();
-        
-        // 만약 해당 월의 파일이 없다면(예방책), 4월분(2026_04)을 기본값으로 Fallback
+        const targetFile   = `./content/questions/${currentYear}_${currentMonth}.json?v=` + Date.now();
+
         let qRes;
         try {
             qRes = await fetch(targetFile);
-            if (!qRes.ok) throw new Error("File not found");
+            if (!qRes.ok) throw new Error("not found");
         } catch(e) {
-            console.warn(`[Fallback] ${targetFile} 가 없어 기본 4월(2026_04.json) 로딩합니다.`);
+            console.warn(`[Fallback] ${targetFile} → 2026_04.json`);
             qRes = await fetch('./content/questions/2026_04.json?v=' + Date.now());
         }
-        
+
         const qData = await qRes.json();
-        
-        let allQuestions = qData.questions || qData; // 지원성을 위해 둘다 체크
-        let mcQuestions = allQuestions.filter(q => q.type === 'MC');
-        let subQuestions = allQuestions.filter(q => q.type === 'SUB');
-        
-        // 10개 카테고리에서 하나씩 랜덤 추출하여 배열 생성
+        const allQuestions = qData.questions || qData;
+        const mcQuestions  = allQuestions.filter(q => q.type === 'MC');
+        const subQuestions = allQuestions.filter(q => q.type === 'SUB');
+
         let selectedQuestions = [];
         for (let i = 1; i <= 10; i++) {
-            let catId = `CAT-${String(i).padStart(2, '0')}`;
-            let catQs = mcQuestions.filter(q => q.category_id === catId);
+            const catId  = `CAT-${String(i).padStart(2, '0')}`;
+            const catQs  = mcQuestions.filter(q => q.category_id === catId);
             if (catQs.length > 0) {
                 selectedQuestions.push(catQs[Math.floor(Math.random() * catQs.length)]);
             }
         }
-        
-        // 주관식 1개 랜덤 추출하여 마지막에 배치
-        let selectedSub = subQuestions[Math.floor(Math.random() * subQuestions.length)];
-        if (selectedSub) {
-            selectedQuestions.push(selectedSub);
-        }
-        
+
+        const selectedSub = subQuestions[Math.floor(Math.random() * subQuestions.length)];
+        if (selectedSub) selectedQuestions.push(selectedSub);
+
         questions = selectedQuestions;
 
-        // 결과 매핑 JSON (임시 유지)
         const rRes = await fetch('./content/results/weather_result_v2.json?v=' + Date.now());
         const rData = await rRes.json();
         resultMapping = rData.results || rData;
+
     } catch (err) {
         console.error("데이터 로딩 실패:", err);
     }
 }
 
-// 2. Start Test
+// ──────────────────────────────────────────────
+// 2. 랜딩 → 대기화면
+// ──────────────────────────────────────────────
+landingScreen.addEventListener('click', () => {
+    showScreen('start-screen');
+    const homeNav = document.querySelector('.nav-item[onclick*="start-screen"]');
+    if (homeNav) homeNav.classList.add('active');
+});
+
+// ──────────────────────────────────────────────
+// 3. 대기화면 → 테스트 시작
+// ──────────────────────────────────────────────
 startBtn.addEventListener('click', () => {
-    startScreen.classList.remove('active');
-    questionScreen.classList.add('active');
+    currentQuestion = 0;
+    weatherScore    = 0;
+    humidityScore   = 0;
     mcArea.style.display = 'block';
     subjectiveArea.style.display = 'none';
-    currentQuestion = 0;
-    weatherScore = 0;
-    humidityScore = 0;
+    showScreen('question-screen', { showHeader: true, showNav: true });
     displayQuestion();
 });
 
-// 3. Display Question
+// ──────────────────────────────────────────────
+// 4. 문항 표시
+// ──────────────────────────────────────────────
 function displayQuestion() {
     if (questions.length === 0) {
         questionText.innerText = '질문을 불러오는 데 실패했습니다. 새로고침 해주세요.';
         return;
     }
-    
+
+    // 모든 문항 완료 → 로딩 → 결과
     if (currentQuestion >= questions.length) {
-        // All questions done — trigger loading -> result
-        questionScreen.classList.remove('active');
-        loadingScreen.classList.add('active');
-        setTimeout(() => {
-            loadingScreen.classList.remove('active');
-            showResult();
-        }, 2500);
+        showScreen('loading-screen', { showHeader: false, showNav: false });
+        setTimeout(() => showResult(), 2500);
         return;
     }
 
     const q = questions[currentQuestion];
-    
-    // Progress UI
+
+    // 진행 바
     progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
 
-    // 11번째 주관식 문항
+    // 주관식 (11번째)
     if (q.type === 'SUB') {
         mcArea.style.display = 'none';
+        const subQ = document.getElementById('sub-question-text');
+        if (subQ) subQ.innerText = q.text;
         subjectiveArea.style.display = 'flex';
         subjectiveArea.style.flexDirection = 'column';
         return;
     }
 
-    // 객관식 문항 표시
+    // 객관식
     mcArea.style.display = 'block';
     subjectiveArea.style.display = 'none';
     questionNumber.innerText = `Question ${String(currentQuestion + 1).padStart(2, '0')} / 10`;
     questionText.innerText = q.text;
     optionsContainer.innerHTML = '';
-    
+
     q.options.forEach((opt, index) => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
-        
-        let optText = typeof opt === 'string' ? opt : opt.text;
-        let score = typeof opt === 'string' ? (q.scores ? q.scores[index] : 1) : opt.score;
-        
+        const optText = typeof opt === 'string' ? opt : opt.text;
+        const score   = typeof opt === 'string'
+            ? (q.scores ? q.scores[index] : 1)
+            : opt.score;
         btn.innerText = optText;
         btn.onclick = () => selectOption(score, q.category_id);
         optionsContainer.appendChild(btn);
     });
 }
 
-// 4. Handle Option Selection & Dual Scoring
+// ──────────────────────────────────────────────
+// 5. 선택지 선택 (이중 축 채점)
+// ──────────────────────────────────────────────
 function selectOption(score, categoryId) {
-    const weatherCats = ['CAT-01', 'CAT-03', 'CAT-05', 'CAT-07', 'CAT-09'];
+    const weatherCats  = ['CAT-01', 'CAT-03', 'CAT-05', 'CAT-07', 'CAT-09'];
     const humidityCats = ['CAT-02', 'CAT-04', 'CAT-06', 'CAT-08', 'CAT-10'];
-    
-    // 배열 방식 구조이므로 각 5개 문항 최대 10점 = 50점 만점 기준
-    if (weatherCats.includes(categoryId)) {
-        weatherScore += score; 
-    } else if (humidityCats.includes(categoryId)) {
-        humidityScore += score; 
-    }
-    
+
+    if (weatherCats.includes(categoryId))  weatherScore  += score;
+    if (humidityCats.includes(categoryId)) humidityScore += score;
+
     currentQuestion++;
     displayQuestion();
 }
 
-// 5. Submit Final Response
+// ──────────────────────────────────────────────
+// 6. 주관식 제출
+// ──────────────────────────────────────────────
 submitBtn.addEventListener('click', () => {
     subjectiveArea.style.display = 'none';
-    questionScreen.classList.remove('active');
-    loadingScreen.classList.add('active');
-    
-    setTimeout(() => {
-        loadingScreen.classList.remove('active');
-        showResult();
-    }, 2500);
+    showScreen('loading-screen', { showHeader: false, showNav: false });
+    setTimeout(() => showResult(), 2500);
 });
 
-// 6. Show Result (Dual Axis Interpretation)
+// ──────────────────────────────────────────────
+// 7. 결과 화면
+// ──────────────────────────────────────────────
 function showResult() {
-    resultScreen.classList.add('active');
-    
-    // 임시 로직: 기존 결과 매핑을 무시하고, 날씨와 습도의 복합 상태 출력
-    // 날씨(에너지): 0~50 / 습도(우울도): 0~50
-    let weatherResult = "흐릿함";
-    if (weatherScore >= 40) weatherResult = "매우 맑음";
-    else if (weatherScore >= 30) weatherResult = "맑고 화창함";
-    else if (weatherScore >= 20) weatherResult = "구름 조금";
-    
-    // 습도 백분율 치환 (최대 50점을 100%로 환산)
-    let humidityPercent = Math.min((humidityScore / 50) * 100, 100).toFixed(0);
-    
-    resultType.innerText = `현재 당신의 하늘: ${weatherResult}`;
-    resultType.style.color = "#3b82f6";
-    
-    // 입체적 진단 문구 동적 생성 로직
-    let diagnosisStr = `☀️ 에너지 충전율: ${weatherScore}/50 점\n💧 내면의 불쾌지수: ${humidityPercent}%\n\n`;
-    
-    if (weatherScore >= 30 && humidityScore >= 30) {
-        diagnosisStr += "겉으로는 완벽하게 에너지를 뿜어내고 있지만 주변 시선을 크게 의식하고 있습니다. 속으로는 눅눅한 스트레스와 끈적한 고민을 가득 머금고 있네요. 이대로 무리하면 거대한 폭풍우가 쏟아질 수 있습니다. '스마일 마스크 징후'를 경계하세요!";
-    } else if (weatherScore >= 30 && humidityScore < 30) {
-        diagnosisStr += "에너지가 넘치고 내면의 습도도 낮아 쾌적한 상태입니다. 지금 이 순간을 온전히 즐기세요. 주변 사람들에게 긍정의 에너지를 나눠주는 태양이 될 수 있습니다.";
-    } else if (weatherScore < 30 && humidityScore >= 30) {
-        diagnosisStr += "에너지 레벨이 떨어져 구름이 끼었을 뿐 아니라, 내면의 우울도(습도)가 꽤 높습니다. 비가 오거나 답답한 안개가 낀 것처럼 혼자만의 동굴에 갇힌 느낌이 들 수 있습니다. 마음의 제습이 필요해요.";
+    showScreen('result-screen');
+
+    // 날씨(에너지) 축: 50점 만점
+    let weatherLabel = "흐릿함";
+    let weatherImgSrc = "assets/cloudy.png";
+
+    if (weatherScore >= 40) {
+        weatherLabel  = "매우 맑음 ☀️";
+        weatherImgSrc = "assets/clear.png";
+    } else if (weatherScore >= 28) {
+        weatherLabel  = "맑고 화창함 🌤";
+        weatherImgSrc = "assets/clear.png";
+    } else if (weatherScore >= 16) {
+        weatherLabel  = "흐림 ⛅";
+        weatherImgSrc = "assets/cloudy.png";
     } else {
-        diagnosisStr += "에너지는 다소 떨어져 있지만, 다행히 내면의 스트레스나 자책감(습도)은 거의 없는 편안하고 건조한 상태입니다. 조금만 푹 잠을 자거나 휴식하면 금방 하늘이 화창해질 수 있어요.";
+        weatherLabel  = "폭풍 전야 🌧";
+        weatherImgSrc = "assets/stormy.png";
     }
-    
+
+    // 습도(우울도) 축
+    const humidityPercent = Math.min((humidityScore / 50) * 100, 100).toFixed(0);
+
+    resultType.innerText = `오늘 내 하늘: ${weatherLabel}`;
+    resultType.style.color = "#FFB347";
+
+    // 이미지 분기 (4종)
+    let finalImg = weatherImgSrc;
+    if (weatherScore >= 28 && humidityScore >= 28) finalImg = "assets/cloudy.png";
+    else if (weatherScore < 28 && humidityScore >= 28) finalImg = "assets/stormy.png";
+    else if (weatherScore < 28 && humidityScore < 28)  finalImg = "assets/foggy.png";
+    resultImg.src = finalImg;
+
+    // 진단 문구
+    let diagStr = `☀️ 에너지 충전율: ${weatherScore}/50점\n💧 내면 불쾌지수: ${humidityPercent}%\n\n`;
+
+    if (weatherScore >= 28 && humidityScore >= 28) {
+        diagStr += "겉으로는 에너지를 뿜어내지만 내면의 습도가 가득 찼어요. 스마일 마스크 징후를 조심하세요. 혼자 속으로만 삭이지 말고 오늘 한 분이라도 솔직하게 털어놔 보세요.";
+    } else if (weatherScore >= 28 && humidityScore < 28) {
+        diagStr += "에너지도 넘치고 내면도 쾌적한 맑은 상태예요! 오늘 하루 주변 사람들에게 긍정 에너지를 나눠줄 수 있는 최상의 날입니다. 이 기분을 마음껏 즐기세요 ☀️";
+    } else if (weatherScore < 28 && humidityScore >= 28) {
+        diagStr += "에너지가 낮고 내면의 우울도(습도)도 높은 상태예요. 비가 오거나 안개가 낀 것처럼 혼자 동굴에 갇힌 느낌이 드실 수 있어요. 마음의 제습이 필요한 시간입니다.";
+    } else {
+        diagStr += "에너지가 조금 낮지만 내면의 스트레스는 거의 없어요. 잠시 쉬면 금방 화창해질 안개 낀 아침 같은 상태예요. 오늘은 충분한 휴식을 챙겨보세요. 🌫️";
+    }
+
+    resultDiagnosis.innerText = diagStr;
+
+    // 처방 영상
     const dummyResult = resultMapping.length > 0 ? resultMapping[0] : null;
-    const animal = dummyResult ? dummyResult.animals[0] : { image: "" };
-    
-    resultDiagnosis.innerText = diagnosisStr;
-    if(animal.image) resultImg.src = animal.image;
-    
-    // Care Video (일단 기존 매핑 사용)
-    if(dummyResult){
-        careTitleLabel.innerText = "지금 당신을 위한 마음의 제습 영상";
+    if (dummyResult) {
+        careTitleLabel.innerText = "지금 당신을 위한 마음의 처방 영상";
         currentCareUrl = dummyResult.care_video_url || "";
-        careVideoText.innerText = `재생하기`;
+        careVideoText.innerText = "재생하기";
     }
 }
 
-// 7. Event Listeners for Actions
-document.getElementById('care-video-btn').addEventListener('click', (e) => {
-    e.preventDefault();
+// ──────────────────────────────────────────────
+// 8. 처방 영상 버튼
+// ──────────────────────────────────────────────
+document.getElementById('care-video-btn').addEventListener('click', () => {
     if (currentCareUrl) {
-        const modal = document.getElementById('video-modal');
+        const modal  = document.getElementById('video-modal');
         const iframe = document.getElementById('video-iframe');
-        iframe.src = currentCareUrl.replace('watch?v=', 'embed/').replace('shorts/', 'embed/');
+        iframe.src   = currentCareUrl
+            .replace('watch?v=', 'embed/')
+            .replace('shorts/', 'embed/');
         modal.classList.add('active');
     }
 });
@@ -234,3 +305,74 @@ document.getElementById('close-modal-btn').onclick = () => {
     document.getElementById('video-modal').classList.remove('active');
     document.getElementById('video-iframe').src = "";
 };
+
+// ──────────────────────────────────────────────
+// 9. 공유하기 (이미지+링크)
+// ──────────────────────────────────────────────
+document.getElementById('share-btn').addEventListener('click', async () => {
+    const appUrl     = 'https://mind-dusky-gamma.vercel.app';
+    const resultText = resultType.innerText;
+    const shareText  = `🌤 내 마음 날씨 진단 결과\n"${resultText}"\n\n직접 체험해보세요 👇\n${appUrl}`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Mind Weather — 내 마음의 기상청',
+                text:  shareText,
+                url:   appUrl
+            });
+        } catch (e) {
+            console.log('Share cancelled:', e);
+        }
+    } else {
+        // 데스크탑 폴백: 클립보드 복사
+        try {
+            await navigator.clipboard.writeText(shareText);
+            showToast('링크가 복사되었습니다! 💫');
+        } catch (e) {
+            prompt('아래 텍스트를 복사해 공유하세요:', shareText);
+        }
+    }
+});
+
+// ──────────────────────────────────────────────
+// 10. 다시하기 버튼
+// ──────────────────────────────────────────────
+document.getElementById('retry-btn').addEventListener('click', () => {
+    currentQuestion = 0;
+    weatherScore    = 0;
+    humidityScore   = 0;
+    showScreen('start-screen');
+    const homeNav = document.querySelector('.nav-item[onclick*="start-screen"]');
+    if (homeNav) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        homeNav.classList.add('active');
+    }
+});
+
+// ──────────────────────────────────────────────
+// 11. 토스트 메시지
+// ──────────────────────────────────────────────
+function showToast(msg) {
+    let toast = document.getElementById('toast-msg');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-msg';
+        toast.style.cssText = `
+            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.75); color: #fff;
+            padding: 12px 24px; border-radius: 50px;
+            font-size: 14px; font-weight: 600;
+            z-index: 999; opacity: 0; transition: opacity 0.3s;
+        `;
+        document.body.appendChild(toast);
+    }
+    toast.innerText = msg;
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+// ──────────────────────────────────────────────
+// 실행
+// ──────────────────────────────────────────────
+init();

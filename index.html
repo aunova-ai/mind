@@ -4,84 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마인드웨더 (Mind Weather) | 내 마음의 기상청</title>
-    <link rel="icon" href="assets/favicon.ico">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta name="description" content="오늘 내 마음의 날씨는? 마인드 웨더와 함께 내면의 기상도를 체크하고 맞춤형 처방전을 받아보세요.">
+    <meta property="og:title" content="Mind Weather | 내 마음의 기상청">
+    <meta property="og:description" content="오늘 마음 날씨를 확인하고 맞춤형 처방전을 받아보세요.">
+    <meta property="og:image" content="assets/intro.png">
+    <meta property="og:url" content="https://mind-dusky-gamma.vercel.app">
+    <link rel="icon" href="assets/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="app-container">
-        <header class="header-logo">
-            <img src="assets/logo.png" alt="Logo" class="top-logo-img">
-            <span class="top-logo-text">Mind Weather</span>
+
+        <!-- ① 랜딩 화면 (전체 화면) -->
+        <section id="landing-screen" class="active">
+            <img src="assets/intro.png" alt="Mind Weather" class="landing-bg-img">
+            <div class="landing-overlay">
+                <div class="landing-top">
+                    <img src="assets/logo.png" alt="logo" class="landing-logo-img">
+                    <h1 class="landing-title">Mind Weather</h1>
+                    <p class="landing-sub">오늘 마음의 날씨를 확인하세요</p>
+                </div>
+                <div class="landing-hint">
+                    <p>화면을 탭하여 시작하기</p>
+                    <div class="hint-bounce">↑</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 공통 헤더 (랜딩/로딩 제외 표시) -->
+        <header id="app-header" style="display:none;">
+            <img src="assets/logo.png" alt="logo" class="header-logo-img">
+            <span class="header-logo-text">Mind Weather</span>
         </header>
 
-        <section id="start-screen" class="active">
+        <!-- ② 테스트 대기 화면 -->
+        <section id="start-screen">
             <div class="content-box">
-                <div class="intro-image-wrapper"><img src="assets/intro.png" class="intro-img"></div>
-                <span class="brand-title">Aunova Mind Weather</span>
-                <h1 class="test-title">오늘 마음 날씨는 어떤가요?</h1>
-                <p class="test-desc">내면의 기상도를 체크하고<br>맞춤형 마음 처방전과 영상을 받아보세요.</p>
+                <div class="intro-image-wrapper">
+                    <img src="assets/intro.png" alt="Mind Weather" class="intro-img">
+                </div>
+                <span class="brand-label">AUNOVA MIND WEATHER</span>
+                <h2 class="start-title">오늘 마음 날씨는 어떤가요?</h2>
+                <p class="start-desc">내면의 기상도를 체크하고<br>맞춤형 마음 처방전을 받아보세요.</p>
                 <button id="start-btn" class="primary-btn">진단 시작하기</button>
             </div>
         </section>
 
+        <!-- ③ 심리 테스트 화면 (객관식 10 + 주관식 1) -->
         <section id="question-screen">
             <div class="question-box">
-                <div class="progress-bar-container"><div id="progress-bar-fill"></div></div>
+                <div class="progress-bar-container">
+                    <div id="progress-bar-fill"></div>
+                </div>
+
+                <!-- 객관식 영역 -->
                 <div id="mc-area">
-                    <span id="question-number">Question 01</span>
+                    <span id="question-number">Question 01 / 10</span>
                     <h2 id="question-text">불러오는 중...</h2>
                     <div id="options-container"></div>
                 </div>
-                <div id="subjective-area" class="subjective-box" style="display:none;">
-                    <span>마지막 질문</span>
-                    <h2>오늘 당신의 기분을 날씨로 한 단어로 표현한다면? 그 이유는 무엇인가요?</h2>
-                    <textarea class="subjective-input" id="subjective-input" placeholder="예: 소나기, 아침에 갑자기 당황스러웠어요."></textarea>
-                    <button id="submit-btn" class="primary-btn" style="margin-top: 20px; width: 100%;">분석 결과 보기</button>
+
+                <!-- 주관식 영역 (11번째) -->
+                <div id="subjective-area" style="display:none;">
+                    <span class="sub-label">✦ 마지막 질문</span>
+                    <h2 id="sub-question-text">오늘 당신의 기분을 날씨로 한 단어로 표현한다면? 그 이유는 무엇인가요?</h2>
+                    <textarea id="subjective-input" class="subjective-input" placeholder="예: 소나기, 아침에 갑자기 당황스러웠어요."></textarea>
+                    <button id="submit-btn" class="primary-btn">분석 결과 보기</button>
                 </div>
             </div>
         </section>
 
+        <!-- ④ 로딩 화면 -->
         <section id="loading-screen">
             <div class="loading-content">
                 <div class="cloud-loader"></div>
-                <p>마음 기상청에서 정밀 분석 중입니다...</p>
+                <p class="loading-text">마음 기상청에서<br>정밀 분석 중입니다...</p>
             </div>
         </section>
 
+        <!-- ⑤ 결과 화면 -->
         <section id="result-screen">
-            <div class="result-box">
+            <div class="result-box" id="result-capture-area">
                 <span class="result-label">오늘 내 마음의 날씨는</span>
                 <h1 id="result-type">분석 중</h1>
-                <div class="result-image-wrapper"><img id="result-img" src=""></div>
+                <div class="result-image-wrapper">
+                    <img id="result-img" src="" alt="결과 이미지">
+                </div>
                 <p id="result-diagnosis"></p>
                 <div id="care-video-section">
                     <span id="care-title">추천 처방 영상</span>
                     <div class="video-card" id="care-video-btn">
                         <div class="video-play-btn">▶</div>
-                        <span id="care-video-text">영상 보기</span>
+                        <span id="care-video-text">재생하기</span>
                     </div>
                 </div>
                 <div class="action-btns">
-                    <button class="share-btn" id="share-btn">공유하기</button>
-                    <button class="community-btn" id="community-btn">커뮤니티 입장</button>
+                    <button class="share-btn" id="share-btn">📸 공유하기</button>
+                    <button class="retry-btn" id="retry-btn">🔄 다시하기</button>
                 </div>
             </div>
         </section>
 
-        <nav id="bottom-nav">
-            <div class="nav-item active" onclick="setNavActive(this)">🏠<span>Home</span></div>
-            <div class="nav-item" onclick="setNavActive(this)">🎁<span>Present</span></div>
-            <div class="nav-item" onclick="setNavActive(this)">📺<span>Video</span></div>
-            <div class="nav-item" onclick="setNavActive(this)">🎧<span>Care</span></div>
-        </nav>
-    </div>
+        <!-- 탭 B: Present (오픈 대기) -->
+        <section id="present-screen">
+            <div class="coming-soon-box">
+                <div class="coming-icon">🎁</div>
+                <h2 class="coming-title">Mind Weather 굿즈샵</h2>
+                <p class="coming-desc">마음 날씨를 담은 특별한 굿즈를<br>준비하고 있어요.</p>
+                <div class="coming-badge">COMING SOON ☁️</div>
+                <!-- 추후 여기에 상품 목록 삽입 -->
+            </div>
+        </section>
 
+        <!-- 탭 C: Video -->
+        <section id="video-screen">
+            <div class="video-page-box">
+                <h2 class="page-title">마음 처방 영상</h2>
+                <p class="page-sub">Aunova 채널의 마음 날씨 영상을 만나보세요</p>
+                <a href="https://www.youtube.com/@AunovaOfficial" target="_blank" class="youtube-channel-card">
+                    <div class="yt-play-icon">▶</div>
+                    <div class="yt-info">
+                        <div class="yt-channel-name">@AunovaOfficial</div>
+                        <div class="yt-channel-sub">유튜브 채널 바로가기 →</div>
+                    </div>
+                </a>
+                <!-- 영상 카드 목록 — URL만 교체하면 반영됨 -->
+                <div class="video-list" id="video-list">
+                    <div class="video-thumb-card" onclick="openVideo('https://www.youtube.com/embed/dQw4w9WgXcQ')">
+                        <div class="video-thumb-placeholder">📺</div>
+                        <span class="video-thumb-title">마음 날씨 처방 영상 #1</span>
+                    </div>
+                    <div class="video-thumb-card" onclick="openVideo('https://www.youtube.com/embed/dQw4w9WgXcQ')">
+                        <div class="video-thumb-placeholder">📺</div>
+                        <span class="video-thumb-title">마음 날씨 처방 영상 #2</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 탭 D: Care (오픈 대기) -->
+        <section id="care-screen">
+            <div class="coming-soon-box">
+                <div class="coming-icon">🎧</div>
+                <h2 class="coming-title">마음 날씨 상담사</h2>
+                <p class="coming-desc">전문 상담사와 함께하는 1:1<br>마음 날씨 분석을 준비 중이에요.</p>
+                <div class="coming-badge">COMING SOON ☁️</div>
+                <!-- 추후 여기에 상담사 목록 및 예약 UI 삽입 -->
+            </div>
+        </section>
+
+        <!-- 하단 탭 바 (단일 인스턴스, 항상 앱 내 고정) -->
+        <nav id="bottom-nav" style="display:none;">
+            <div class="nav-item active" onclick="navigateTo('start-screen', this)">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </div>
+            <div class="nav-item" onclick="navigateTo('present-screen', this)">
+                <span class="nav-icon">🎁</span>
+                <span class="nav-label">Present</span>
+            </div>
+            <div class="nav-item" onclick="navigateTo('video-screen', this)">
+                <span class="nav-icon">📺</span>
+                <span class="nav-label">Video</span>
+            </div>
+            <div class="nav-item" onclick="navigateTo('care-screen', this)">
+                <span class="nav-icon">🎧</span>
+                <span class="nav-label">Care</span>
+            </div>
+        </nav>
+
+    </div><!-- /#app-container -->
+
+    <!-- 영상 모달 -->
     <div id="video-modal" class="modal-overlay">
         <div class="modal-content">
             <button id="close-modal-btn" class="close-btn">&times;</button>
-            <div class="iframe-container"><iframe id="video-iframe" src="" frameborder="0" allowfullscreen></iframe></div>
+            <div class="iframe-container">
+                <iframe id="video-iframe" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
 
