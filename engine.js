@@ -149,6 +149,23 @@ async function init() {
 
         questions = selectedQuestions;
 
+        // 결과 영상 매핑 (CSV 우선 로드)
+        try {
+            const csvRes = await fetch('./content/care_videos_template.csv?v=' + Date.now());
+            if(csvRes.ok) {
+                const csvText = await csvRes.text();
+                const rows = csvText.split('\n');
+                rows.slice(1).forEach(row => {
+                    const cols = row.split(',');
+                    if(cols.length >= 4) {
+                        const state = cols[0].trim();
+                        const url = cols[3].trim();
+                        if(url && url.includes('http')) resultVideoMap[state] = url;
+                    }
+                });
+            }
+        } catch(e) { console.log('CSV mapping failed, using defaults'); }
+
         // Video 탭 목록 렌더링
         renderVideoTab();
 
@@ -158,13 +175,38 @@ async function init() {
 }
 
 // ──────────────────────────────────────────────
-// 동영상 탭 플레이리스트 렌더링
+// 동영상 탭 플레이리스트 렌더링 (유튜브 RSS 자동 연동)
 // ──────────────────────────────────────────────
-function renderVideoTab() {
+async function renderVideoTab() {
     if(!videoListEl) return;
+    videoListEl.innerHTML = '<div style="padding:40px; text-align:center; color:#888; font-size:14px; grid-column:1/-1;">채널 최신 영상을 불러옵니다...</div>';
+
+    let vidsToRender = featuredVideos; // 폴백용 배열
+
+    try {
+        // Aunova 채널 고유 ID를 이곳에 입력 (추후 대표님이 채널 설정에서 확인 후 교체)
+        const channelId = "UCYOUR_CHANNEL_ID_HERE"; 
+        // fallback 테스트 시 유명 채널 UC_x5XG1OV2P6uZZ5FSM9Ttw 등으로 확인 가능합니다.
+        const rssUrl = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
+        const apiStr = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
+        
+        const res = await fetch(apiStr);
+        const data = await res.json();
+        
+        if(data.status === 'ok' && data.items && data.items.length > 0) {
+            vidsToRender = data.items.map(item => ({
+                title: item.title,
+                thumbnailUrl: item.thumbnail,
+                embedUrl: item.link.replace('watch?v=', 'embed/')
+            }));
+        }
+    } catch(err) {
+        console.warn("RSS 연동 실패, 기본 비디오 노출");
+    }
+
     videoListEl.innerHTML = '';
     
-    featuredVideos.forEach(vid => {
+    vidsToRender.forEach(vid => {
         const card = document.createElement('div');
         card.className = 'video-thumb-card';
         card.onclick = () => openVideo(vid.embedUrl);
