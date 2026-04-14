@@ -185,7 +185,7 @@ async function renderVideoTab() {
 
     try {
         // Aunova 채널 고유 ID를 이곳에 입력 (추후 대표님이 채널 설정에서 확인 후 교체)
-        const channelId = "UCYOUR_CHANNEL_ID_HERE"; 
+        const channelId = "UCSEhvpdirLIrhddApULC9lg"; 
         // fallback 테스트 시 유명 채널 UC_x5XG1OV2P6uZZ5FSM9Ttw 등으로 확인 가능합니다.
         const rssUrl = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
         const apiStr = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
