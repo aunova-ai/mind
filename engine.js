@@ -22,9 +22,11 @@ const startScreen      = document.getElementById('start-screen');
 const questionScreen   = document.getElementById('question-screen');
 const loadingScreen    = document.getElementById('loading-screen');
 const resultScreen     = document.getElementById('result-screen');
+const videoScreen      = document.getElementById('video-screen');
 
 const appHeader        = document.getElementById('app-header');
 const bottomNav        = document.getElementById('bottom-nav');
+const appContainer     = document.getElementById('app-container');
 
 const mcArea           = document.getElementById('mc-area');
 const subjectiveArea   = document.getElementById('subjective-area');
@@ -40,6 +42,32 @@ const resultDiagnosis  = document.getElementById('result-diagnosis');
 const resultImg        = document.getElementById('result-img');
 const careVideoText    = document.getElementById('care-video-text');
 const careTitleLabel   = document.getElementById('care-title');
+const videoListEl      = document.getElementById('video-list');
+
+// ──────────────────────────────────────────────
+// 비디오 콘텐츠 데이터 (자동화 대비 구조)
+// ──────────────────────────────────────────────
+// 진단 결과 영상 매핑 (나중에 구글시트/JSON으로 분리 가능)
+const resultVideoMap = {
+    "clear":  "https://www.youtube.com/embed/dQw4w9WgXcQ", // 맑음 영상 URL (대체 필요)
+    "cloudy": "https://www.youtube.com/embed/dQw4w9WgXcQ", // 스마일마스크 영상 URL
+    "stormy": "https://www.youtube.com/embed/dQw4w9WgXcQ", // 우울/폭풍 영상 URL
+    "foggy":  "https://www.youtube.com/embed/dQw4w9WgXcQ"  // 피로/안개 영상 URL
+};
+
+// Video 탭 추천 플레이리스트 목록
+const featuredVideos = [
+    {
+        title: "마음 날씨 처방: 불안할 때 듣는 위로",
+        thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+        embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    },
+    {
+        title: "마음의 안개가 낀 날, 가벼운 명상",
+        thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+        embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    }
+];
 
 // ──────────────────────────────────────────────
 // 화면 전환 유틸리티
@@ -121,13 +149,34 @@ async function init() {
 
         questions = selectedQuestions;
 
-        const rRes = await fetch('./content/results/weather_result_v2.json?v=' + Date.now());
-        const rData = await rRes.json();
-        resultMapping = rData.results || rData;
+        // Video 탭 목록 렌더링
+        renderVideoTab();
 
     } catch (err) {
         console.error("데이터 로딩 실패:", err);
     }
+}
+
+// ──────────────────────────────────────────────
+// 동영상 탭 플레이리스트 렌더링
+// ──────────────────────────────────────────────
+function renderVideoTab() {
+    if(!videoListEl) return;
+    videoListEl.innerHTML = '';
+    
+    featuredVideos.forEach(vid => {
+        const card = document.createElement('div');
+        card.className = 'video-thumb-card';
+        card.onclick = () => openVideo(vid.embedUrl);
+        
+        card.innerHTML = `
+            <div class="video-thumb-image" style="background-image: url('${vid.thumbnailUrl}')">
+                <div class="video-thumb-play-icon">▶</div>
+            </div>
+            <span class="video-thumb-title">${vid.title}</span>
+        `;
+        videoListEl.appendChild(card);
+    });
 }
 
 // ──────────────────────────────────────────────
@@ -234,20 +283,17 @@ function showResult() {
 
     // 날씨(에너지) 축: 50점 만점
     let weatherLabel = "흐릿함";
+    let weatherState = "foggy"; // 결과 구분용 코드
     let weatherImgSrc = "assets/cloudy.png";
 
     if (weatherScore >= 40) {
         weatherLabel  = "매우 맑음 ☀️";
-        weatherImgSrc = "assets/clear.png";
     } else if (weatherScore >= 28) {
         weatherLabel  = "맑고 화창함 🌤";
-        weatherImgSrc = "assets/clear.png";
     } else if (weatherScore >= 16) {
         weatherLabel  = "흐림 ⛅";
-        weatherImgSrc = "assets/cloudy.png";
     } else {
         weatherLabel  = "폭풍 전야 🌧";
-        weatherImgSrc = "assets/stormy.png";
     }
 
     // 습도(우울도) 축
@@ -257,10 +303,22 @@ function showResult() {
     resultType.style.color = "#FFB347";
 
     // 이미지 분기 (4종)
-    let finalImg = weatherImgSrc;
-    if (weatherScore >= 28 && humidityScore >= 28) finalImg = "assets/cloudy.png";
-    else if (weatherScore < 28 && humidityScore >= 28) finalImg = "assets/stormy.png";
-    else if (weatherScore < 28 && humidityScore < 28)  finalImg = "assets/foggy.png";
+    let finalImg = "assets/clear.png";
+    if (weatherScore >= 28 && humidityScore >= 28) {
+        finalImg = "assets/cloudy.png";
+        weatherState = "cloudy";
+    }
+    else if (weatherScore < 28 && humidityScore >= 28) {
+        finalImg = "assets/stormy.png";
+        weatherState = "stormy";
+    }
+    else if (weatherScore < 28 && humidityScore < 28) {
+        finalImg = "assets/foggy.png";
+        weatherState = "foggy";
+    } else {
+        weatherState = "clear";
+    }
+    
     resultImg.src = finalImg;
 
     // 진단 문구
@@ -278,13 +336,10 @@ function showResult() {
 
     resultDiagnosis.innerText = diagStr;
 
-    // 처방 영상
-    const dummyResult = resultMapping.length > 0 ? resultMapping[0] : null;
-    if (dummyResult) {
-        careTitleLabel.innerText = "지금 당신을 위한 마음의 처방 영상";
-        currentCareUrl = dummyResult.care_video_url || "";
-        careVideoText.innerText = "재생하기";
-    }
+    // 처방 영상 연결 로직 (상태별 영상 맵핑)
+    careTitleLabel.innerText = "지금 당신을 위한 맞춤 처방 영상";
+    currentCareUrl = resultVideoMap[weatherState] || "https://www.youtube.com/embed/dQw4w9WgXcQ";
+    careVideoText.innerText = "재생하기";
 }
 
 // ──────────────────────────────────────────────
@@ -307,7 +362,7 @@ document.getElementById('close-modal-btn').onclick = () => {
 };
 
 // ──────────────────────────────────────────────
-// 9. 공유하기 (이미지+링크)
+// 9. 공유하기 (클립보드 폴백 보완)
 // ──────────────────────────────────────────────
 document.getElementById('share-btn').addEventListener('click', async () => {
     const appUrl     = 'https://mind-dusky-gamma.vercel.app';
@@ -321,17 +376,33 @@ document.getElementById('share-btn').addEventListener('click', async () => {
                 text:  shareText,
                 url:   appUrl
             });
+            return;
         } catch (e) {
-            console.log('Share cancelled:', e);
+            console.log('Share API cancelled or failed:', e);
         }
-    } else {
-        // 데스크탑 폴백: 클립보드 복사
-        try {
+    } 
+    
+    // PC 및 폴백: 텍스트에어리어 생성 방식 클립보드 복사
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(shareText);
             showToast('링크가 복사되었습니다! 💫');
-        } catch (e) {
-            prompt('아래 텍스트를 복사해 공유하세요:', shareText);
+        } else {
+            // 오래된 브라우저나 비보안 보안 컨텍스트 폴백
+            let textArea = document.createElement("textarea");
+            textArea.value = shareText;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            textArea.remove();
+            showToast('링크가 복사되었습니다! 💫');
         }
+    } catch (err) {
+        prompt('아래 텍스트를 복사해 공유하세요:', shareText);
     }
 });
 
@@ -359,17 +430,19 @@ function showToast(msg) {
         toast = document.createElement('div');
         toast.id = 'toast-msg';
         toast.style.cssText = `
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.75); color: #fff;
-            padding: 12px 24px; border-radius: 50px;
-            font-size: 14px; font-weight: 600;
-            z-index: 999; opacity: 0; transition: opacity 0.3s;
+            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); color: #fff;
+            padding: 14px 28px; border-radius: 50px;
+            font-size: 15px; font-weight: 700;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            pointer-events: none;
         `;
-        document.body.appendChild(toast);
+        appContainer.appendChild(toast); // body 대신 app-container 안에 넣어 확실히 보이게
     }
     toast.innerText = msg;
     toast.style.opacity = '1';
-    setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
 // ──────────────────────────────────────────────
