@@ -18,7 +18,7 @@
 body {
     font-family: 'Outfit', 'Noto Sans KR', sans-serif;
     background: var(--bg-gradient);
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -29,16 +29,31 @@ body {
 #app-container {
     width: 100%;
     max-width: 450px;
-    height: 90vh;
+    height: 100dvh;
     position: relative;
-    padding: 20px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent page scroll */
+}
+
+.header-logo {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 section {
     display: none;
     flex-direction: column;
     align-items: center;
-    height: 100%;
+    justify-content: center; 
+    flex-grow: 1;
+    height: calc(100% - 110px); /* Account for bottom nav */
+    overflow: hidden;
+    padding-bottom: 20px;
     animation: fadeIn 0.5s ease;
 }
 
@@ -55,21 +70,35 @@ section.active {
 .content-box, .question-box, .result-box {
     background: var(--box-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 32px; /* Increased Roundness */
-    padding: 40px 30px;
+    border-radius: 32px;
+    padding: 25px 20px;
     width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around; /* Distribute items to avoid dead space */
+    overflow-y: hidden; /* Try to avoid scroll */
     box-shadow: 0 15px 40px rgba(255, 179, 71, 0.1);
-    text-align: center;
+}
+
+@media (max-height: 700px) {
+    .content-box, .question-box {
+        padding: 15px;
+        justify-content: center;
+    }
 }
 
 /* Start Screen */
 .intro-image-wrapper {
-    width: 200px;
-    height: 200px;
-    margin-bottom: 20px;
-    border-radius: 50%;
+    width: 100%;
+    max-width: 180px; /* Reduced for PC and Mobile to fit button */
+    aspect-ratio: 1/1;
+    margin-bottom: 15px;
+    border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    flex-shrink: 2; /* Allow more shrinking */
 }
 
 .intro-img {
@@ -79,23 +108,23 @@ section.active {
 }
 
 .brand-title {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--primary-color);
     letter-spacing: 2px;
     margin-bottom: 5px;
 }
 
 .test-title {
-    font-size: 32px;
-    margin-bottom: 15px;
+    font-size: 26px; /* Slightly smaller for tighter fit */
+    margin-bottom: 10px;
     font-weight: 700;
 }
 
 .test-desc {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text-sub);
-    line-height: 1.6;
-    margin-bottom: 40px;
+    line-height: 1.5;
+    margin-bottom: 25px;
 }
 
 .primary-btn {
@@ -164,6 +193,29 @@ section.active {
     background: #f8f0ff;
 }
 
+/* Subjective Input Style */
+.subjective-input {
+    width: 100%;
+    height: 150px;
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: #fafafa;
+    font-family: inherit;
+    font-size: 16px;
+    resize: none;
+    outline: none;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.03);
+    color: var(--text-main);
+    transition: all 0.3s ease;
+}
+
+.subjective-input:focus {
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.2);
+}
+
 /* Result Screen */
 .result-label {
     font-size: 16px;
@@ -178,17 +230,21 @@ section.active {
 
 .result-image-wrapper {
     width: 100%;
-    height: 250px;
+    height: auto;
+    max-height: 250px;
     background: white;
     border-radius: 20px;
     margin-bottom: 25px;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #result-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Prevents image cutting */
 }
 
 .action-btns {
@@ -255,7 +311,7 @@ section.active {
 /* Bottom Nav Style */
 #bottom-nav {
     position: absolute;
-    bottom: 30px;
+    bottom: 20px;
     left: 20px;
     right: 20px;
     background: white;
@@ -266,6 +322,7 @@ section.active {
     align-items: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     padding: 0 20px;
+    z-index: 10;
 }
 
 .nav-item {
