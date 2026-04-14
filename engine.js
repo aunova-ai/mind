@@ -147,7 +147,7 @@ async function init() {
         // 결과 영상 매핑 (CSV 다중 영상 로드)
         try {
             // [Zero-cost CMS] 구글 스프레드시트 실시간 연동 (링크 공유 설정된 ID)
-            const sheetId = "11t2u1Fgwtf1Ine_XTMPVWfYUmbmml72T";
+            const sheetId = "16MxoVZBPwWKNKBlzpqFafZRzGevRB0yI9VDPKBrmdT0";
             const googleSheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&v=${Date.now()}`;
             const localCsvUrl = `./content/care_videos_template.csv?v=${Date.now()}`;
 
