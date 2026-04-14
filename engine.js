@@ -47,23 +47,18 @@ const videoListEl      = document.getElementById('video-list');
 // ──────────────────────────────────────────────
 // 비디오 콘텐츠 데이터 (자동화 대비 구조)
 // ──────────────────────────────────────────────
-// 진단 결과 영상 매핑 (나중에 구글시트/JSON으로 분리 가능)
-const resultVideoMap = {
-    "clear":  "https://www.youtube.com/embed/dQw4w9WgXcQ", // 맑음 영상 URL (대체 필요)
-    "cloudy": "https://www.youtube.com/embed/dQw4w9WgXcQ", // 스마일마스크 영상 URL
-    "stormy": "https://www.youtube.com/embed/dQw4w9WgXcQ", // 우울/폭풍 영상 URL
-    "foggy":  "https://www.youtube.com/embed/dQw4w9WgXcQ"  // 피로/안개 영상 URL
+// 진단 결과 영상 매핑 (배열로 관리하여 랜덤 재생 지원)
+let resultVideoMap = {
+    "clear":  ["https://www.youtube.com/embed/dQw4w9WgXcQ"],
+    "cloudy": ["https://www.youtube.com/embed/dQw4w9WgXcQ"],
+    "stormy": ["https://www.youtube.com/embed/dQw4w9WgXcQ"],
+    "foggy":  ["https://www.youtube.com/embed/dQw4w9WgXcQ"]
 };
 
 // Video 탭 추천 플레이리스트 목록
 const featuredVideos = [
     {
-        title: "마음 날씨 처방: 불안할 때 듣는 위로",
-        thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-        embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-    },
-    {
-        title: "마음의 안개가 낀 날, 가벼운 명상",
+        title: "마음 날씨 처방 영상",
         thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
         embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
     }
@@ -149,18 +144,24 @@ async function init() {
 
         questions = selectedQuestions;
 
-        // 결과 영상 매핑 (CSV 우선 로드)
+        // 결과 영상 매핑 (CSV 다중 영상 로드)
         try {
             const csvRes = await fetch('./content/care_videos_template.csv?v=' + Date.now());
             if(csvRes.ok) {
                 const csvText = await csvRes.text();
                 const rows = csvText.split('\n');
+                
+                // 기본값 비우기 (불러오기 성공 시)
+                resultVideoMap = { "clear":[], "cloudy":[], "stormy":[], "foggy":[] };
+                
                 rows.slice(1).forEach(row => {
                     const cols = row.split(',');
                     if(cols.length >= 4) {
                         const state = cols[0].trim();
                         const url = cols[3].trim();
-                        if(url && url.includes('http')) resultVideoMap[state] = url;
+                        if(url && url.includes('http') && resultVideoMap[state]) {
+                            resultVideoMap[state].push(url);
+                        }
                     }
                 });
             }
@@ -378,9 +379,13 @@ function showResult() {
 
     resultDiagnosis.innerText = diagStr;
 
-    // 처방 영상 연결 로직 (상태별 영상 맵핑)
+    // 처방 영상 연결 로직 (상태별 영상 랜덤 매핑)
     careTitleLabel.innerText = "지금 당신을 위한 맞춤 처방 영상";
-    currentCareUrl = resultVideoMap[weatherState] || "https://www.youtube.com/embed/dQw4w9WgXcQ";
+    const videoArray = resultVideoMap[weatherState] && resultVideoMap[weatherState].length > 0
+        ? resultVideoMap[weatherState] 
+        : ["https://www.youtube.com/embed/dQw4w9WgXcQ"];
+    
+    currentCareUrl = videoArray[Math.floor(Math.random() * videoArray.length)];
     careVideoText.innerText = "재생하기";
 }
 
