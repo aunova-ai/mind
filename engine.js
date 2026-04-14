@@ -89,7 +89,7 @@ startBtn.addEventListener('click', () => {
     startScreen.classList.remove('active');
     questionScreen.classList.add('active');
     mcArea.style.display = 'block';
-    subjectiveArea.classList.remove('active');
+    subjectiveArea.style.display = 'none';
     currentQuestion = 0;
     weatherScore = 0;
     humidityScore = 0;
@@ -98,45 +98,48 @@ startBtn.addEventListener('click', () => {
 
 // 3. Display Question
 function displayQuestion() {
-    if (currentQuestion >= questions.length || questions.length === 0) {
-        return; // All done
+    if (questions.length === 0) {
+        questionText.innerText = '질문을 불러오는 데 실패했습니다. 새로고침 해주세요.';
+        return;
+    }
+    
+    if (currentQuestion >= questions.length) {
+        // All questions done — trigger loading -> result
+        questionScreen.classList.remove('active');
+        loadingScreen.classList.add('active');
+        setTimeout(() => {
+            loadingScreen.classList.remove('active');
+            showResult();
+        }, 2500);
+        return;
     }
 
     const q = questions[currentQuestion];
     
-    // Progress UI 업데이트
+    // Progress UI
     progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
 
-    // 11번째: 주관식 문항 처리
+    // 11번째 주관식 문항
     if (q.type === 'SUB') {
         mcArea.style.display = 'none';
-        
-        // subjective area 안의 라벨을 동적으로 수정
-        let subLabel = document.getElementById('subjective-question-text');
-        if (!subLabel) {
-            subLabel = document.createElement('h3');
-            subLabel.id = 'subjective-question-text';
-            subLabel.style.marginBottom = '20px';
-            subjectiveArea.insertBefore(subLabel, subjectiveArea.firstChild);
-        }
-        subLabel.innerText = q.text;
-        
-        subjectiveArea.classList.add('active');
+        subjectiveArea.style.display = 'flex';
+        subjectiveArea.style.flexDirection = 'column';
         return;
     }
 
-    // 객관식 문항 노출
+    // 객관식 문항 표시
+    mcArea.style.display = 'block';
+    subjectiveArea.style.display = 'none';
     questionNumber.innerText = `Question ${String(currentQuestion + 1).padStart(2, '0')} / 10`;
     questionText.innerText = q.text;
     optionsContainer.innerHTML = '';
     
-    // Q.options가 배열인지 이전 포맷의 오브젝트 배열인지 체크하여 모두 호환
     q.options.forEach((opt, index) => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         
         let optText = typeof opt === 'string' ? opt : opt.text;
-        let score = typeof opt === 'string' ? q.scores[index] : opt.score;
+        let score = typeof opt === 'string' ? (q.scores ? q.scores[index] : 1) : opt.score;
         
         btn.innerText = optText;
         btn.onclick = () => selectOption(score, q.category_id);
@@ -162,6 +165,7 @@ function selectOption(score, categoryId) {
 
 // 5. Submit Final Response
 submitBtn.addEventListener('click', () => {
+    subjectiveArea.style.display = 'none';
     questionScreen.classList.remove('active');
     loadingScreen.classList.add('active');
     
