@@ -40,7 +40,8 @@ body {
 #app-container {
     width: 100%;
     max-width: 480px;       /* 모바일 기본 */
-    min-height: 100dvh;
+    height: 100dvh;
+    max-height: 100dvh;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -78,7 +79,8 @@ section {
     align-items: center;
     flex-grow: 1;
     width: 100%;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     animation: fadeIn 0.35s ease-out;
 }
 
