@@ -934,3 +934,87 @@ section.active { display: flex; }
     .question-box { padding: 20px 18px; }
     .progress-bar-container { margin-bottom: 16px; }
 }
+/* ─────────────────────────────────────────── */
+/* PC 최적화: 가로 공간 활용 & 스크롤 최소화      */
+/* ─────────────────────────────────────────── */
+@media (min-width: 1024px) {
+    #app-container {
+        max-width: 1080px;  /* PC는 넓게 사용 */
+        background: #fff;
+        box-shadow: 0 0 100px rgba(0,0,0,0.05);
+    }
+
+    /* 결과 페이지: 2컬럼 레이아웃 */
+    #result-screen {
+        padding: 40px 80px 120px;
+    }
+
+    .result-box {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        grid-template-areas: 
+            "label label"
+            "type type"
+            "img diag"
+            "img video"
+            "img btns";
+        gap: 0 60px;
+        text-align: left;
+        align-items: start;
+        padding: 60px;
+    }
+
+    .result-label { grid-area: label; text-align: center; }
+    #result-type { 
+        grid-area: type; 
+        text-align: center; 
+        font-size: 42px; 
+        margin-bottom: 45px; 
+    }
+
+    .result-image-wrapper { 
+        grid-area: img; 
+        height: 420px; 
+        max-height: 420px;
+        margin-bottom: 0;
+        border-radius: 24px;
+    }
+
+    #result-diagnosis { 
+        grid-area: diag; 
+        font-size: 16px; 
+        line-height: 1.8;
+        margin-top: 10px;
+    }
+
+    #care-video-section { 
+        grid-area: video; 
+        margin-top: 20px; 
+    }
+
+    .action-btns { 
+        grid-area: btns; 
+        margin-top: 35px; 
+    }
+
+    /* 비디오 페이지: 2컬럼 리스트 */
+    .video-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    /* 시작 페이지 요소를 조금 더 키움 */
+    #start-screen {
+        padding: 0 60px 100px;
+    }
+    .intro-image-wrapper {
+        width: 280px;
+        height: 280px;
+    }
+    .start-title { font-size: 38px; }
+    .content-box { 
+        padding: 60px; 
+        max-width: 800px;
+    }
+}
