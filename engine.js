@@ -146,26 +146,49 @@ async function init() {
 
         // 결과 영상 매핑 (CSV 다중 영상 로드)
         try {
-            const csvRes = await fetch('./content/care_videos_template.csv?v=' + Date.now());
+            // [Zero-cost CMS] 구글 스프레드시트 실시간 연동 (링크 공유 설정된 ID)
+            const sheetId = "11t2u1Fgwtf1Ine_XTMPVWfYUmbmml72T";
+            const googleSheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&v=${Date.now()}`;
+            const localCsvUrl = `./content/care_videos_template.csv?v=${Date.now()}`;
+
+            let csvRes;
+            try {
+                // 1순위: 구글 시트 (실시간 반영)
+                csvRes = await fetch(googleSheetUrl);
+                if (!csvRes.ok) throw new Error("Google Sheet fetch failed");
+                console.log("Successfully loaded care videos from Google Sheets");
+            } catch (err) {
+                // 2순위: 로컬 CSV (네트워크 문제나 CORS 대비)
+                console.warn("[CMS Fallback] Google Sheet failed, loading local CSV...");
+                csvRes = await fetch(localCsvUrl);
+            }
+
             if(csvRes.ok) {
                 const csvText = await csvRes.text();
                 const rows = csvText.split('\n');
                 
-                // 기본값 비우기 (불러오기 성공 시)
+                // 데이터 정화 처리 (불러오기 성공 시 초기화)
                 resultVideoMap = { "clear":[], "cloudy":[], "stormy":[], "foggy":[] };
                 
                 rows.slice(1).forEach(row => {
+                    // 콤마(,) 기준 파싱 (따옴표 내 콤마 무시 등 복잡한 파싱은 생략, 대신 기본 주소만 체크)
                     const cols = row.split(',');
                     if(cols.length >= 4) {
                         const state = cols[0].trim();
-                        const url = cols[3].trim();
+                        let url = cols[3].trim();
+                        
+                        // 유튜브 링크만 필터링
                         if(url && url.includes('http') && resultVideoMap[state]) {
+                            // 공유 주소를 임베드 주소로 변환 (필수)
+                            if (url.includes('watch?v=')) url = url.replace('watch?v=', 'embed/');
+                            if (url.includes('youtu.be/')) url = url.replace('youtu.be/', 'www.youtube.com/embed/');
+                            
                             resultVideoMap[state].push(url);
                         }
                     }
                 });
             }
-        } catch(e) { console.log('CSV mapping failed, using defaults'); }
+        } catch(e) { console.error('Video mapping final failure:', e); }
 
         // Video 탭 목록 렌더링
         renderVideoTab();
