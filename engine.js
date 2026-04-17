@@ -347,59 +347,50 @@ submitBtn.addEventListener('click', () => {
 function showResult() {
     showScreen('result-screen');
 
-    // 날씨(에너지) 축: 50점 만점
-    let weatherLabel = "흐릿함";
-    let weatherState = "foggy"; // 결과 구분용 코드
-    let weatherImgSrc = "assets/cloudy.png";
+    // 1. 상태 결정 (에너지 x 우울도 조합)
+    let weatherState = "clear";
+    let finalImg = "assets/clear.png";
+    let weatherLabel = "최상의 맑음 ☀️";
+    let diagTitle = "[최상의 맑음 ☀️]";
+    let diagSubtitle = "긍정적인 에너지가 충만하고 스트레스가 없는 상태.";
+    let diagDesc = "현재 에너지가 높고 마음이 매우 가볍습니다. 이 긍정적인 기운을 주변과 나누거나 새로운 도전에 나서기 아주 좋은 상태입니다. 이 기분을 마음껏 즐기세요!";
 
-    if (weatherScore >= 40) {
-        weatherLabel  = "매우 맑음 ☀️";
-    } else if (weatherScore >= 28) {
-        weatherLabel  = "맑고 화창함 🌤";
-    } else if (weatherScore >= 16) {
-        weatherLabel  = "흐림 ⛅";
-    } else {
-        weatherLabel  = "폭풍 전야 🌧";
+    if (weatherScore >= 28 && humidityScore >= 28) {
+        weatherState = "cloudy";
+        finalImg = "assets/cloudy.png";
+        weatherLabel = "스마일 마스크 ⛅";
+        diagTitle = "[스마일 마스크 증후군 ⛅]";
+        diagSubtitle = "속은 타들어가지만 겉으로는 티 내지 않고 무리해서 웃고 있는 상태.";
+        diagDesc = "겉으로는 활기차 보이지만, 내면에는 꽤 많은 피로와 불안감이 쌓여있습니다. 남의 시선보다 내 마음을 먼저 돌보며 잠시 숨을 고르는 시간이 꼭 필요합니다.";
+    } 
+    else if (weatherScore < 28 && humidityScore >= 28) {
+        weatherState = "stormy";
+        finalImg = "assets/stormy.png";
+        weatherLabel = "에너지 방전 🌧";
+        diagTitle = "[에너지 방전/우울 🌧]";
+        diagSubtitle = "에너지가 고갈되었고 극심한 번아웃과 우울감이 쏟아지고 있는 상태.";
+        diagDesc = "마음의 방어선이 약해져 작은 일에도 크게 상처받고 휘청일 수 있습니다. 지금은 스스로를 절대 탓하지 말고, 무조건 마음의 비를 피하며 안전한 곳에서 푹 쉬는 것이 최우선입니다.";
+    } 
+    else if (weatherScore < 28 && humidityScore < 28) {
+        weatherState = "foggy";
+        finalImg = "assets/foggy.png";
+        weatherLabel = "무기력/안개 🌫";
+        diagTitle = "[무기력/안개 🌫]";
+        diagSubtitle = "심각한 스트레스는 없지만, 모든 것이 귀찮고 머릿속이 멍한 상태.";
+        diagDesc = "마치 짙은 안개 속에 있는 것처럼 의욕이 생기지 않고 전체적인 에너지가 가라앉아 있습니다. 거창한 목표보다는 가벼운 산책과 충분한 수면으로 뇌를 환기해보세요.";
     }
 
-    // 습도(우울도) 축
+    // 2. UI 업데이트
     const humidityPercent = Math.min((humidityScore / 50) * 100, 100).toFixed(0);
-
+    
     resultType.innerText = `오늘 내 하늘: ${weatherLabel}`;
     resultType.style.color = "#FFB347";
-
-    // 이미지 분기 (4종)
-    let finalImg = "assets/clear.png";
-    if (weatherScore >= 28 && humidityScore >= 28) {
-        finalImg = "assets/cloudy.png";
-        weatherState = "cloudy";
-    }
-    else if (weatherScore < 28 && humidityScore >= 28) {
-        finalImg = "assets/stormy.png";
-        weatherState = "stormy";
-    }
-    else if (weatherScore < 28 && humidityScore < 28) {
-        finalImg = "assets/foggy.png";
-        weatherState = "foggy";
-    } else {
-        weatherState = "clear";
-    }
-    
     resultImg.src = finalImg;
 
-    // 진단 문구
+    // 진단 문구 조립
     let diagStr = `☀️ 에너지 충전율: ${weatherScore}/50점\n💧 내면 불쾌지수: ${humidityPercent}%\n\n`;
-
-    if (weatherScore >= 28 && humidityScore >= 28) {
-        diagStr += "[스마일 마스크 증후군 ⛅]\n속은 타들어가지만 겉으로는 티 내지 않고 무리해서 웃으며 에너지를 쓰고 있는 상태.\n\n겉으로는 활기차 보이지만, 내면에는 꽤 많은 피로와 불안감이 쌓여있습니다. 남의 시선보다 내 마음을 먼저 돌보며 잠시 숨을 고르는 시간이 꼭 필요합니다.";
-    } else if (weatherScore >= 28 && humidityScore < 28) {
-        diagStr += "[최상의 맑음 ☀️]\n긍정적인 에너지가 충만하고 스트레스가 없는 상태.\n\n현재 에너지가 높고 마음이 매우 가볍습니다. 이 긍정적인 기운을 주변과 나누거나 새로운 도전에 나서기 아주 좋은 상태입니다. 이 기분을 마음껏 즐기세요!";
-    } else if (weatherScore < 28 && humidityScore >= 28) {
-        diagStr += "[에너지 방전/우울 🌧]\n에너지가 고갈되었고 극심한 번아웃과 우울감이 쏟아지고 있는 상태.\n\n마음의 방어선이 약해져 작은 일에도 크게 상처받고 휘청일 수 있습니다. 지금은 스스로를 절대 탓하지 말고, 무조건 마음의 비를 피하며 안전한 곳에서 푹 쉬는 것이 최우선입니다.";
-    } else {
-        diagStr += "[무기력/안개 🌫]\n심각한 스트레스는 없지만, 모든 것이 귀찮고 머릿속이 멍한 상태.\n\n마치 짙은 안개 속에 있는 것처럼 의욕이 생기지 않고 전체적인 에너지가 가라앉아 있습니다. 거창한 목표보다는 가벼운 산책과 충분한 수면으로 뇌를 환기해보세요.";
-    }
-
+    diagStr += `${diagTitle}\n${diagSubtitle}\n\n${diagDesc}`;
+    
     resultDiagnosis.innerText = diagStr;
 
     // 처방 영상 연결 로직 (상태별 영상 랜덤 매핑)
